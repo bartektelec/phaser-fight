@@ -1,0 +1,11 @@
+body, html {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #3A404D;
+}
+
+canvas {
+    border: 3px solid black;
+}
