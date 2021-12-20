@@ -1,73 +1,65 @@
-import { Redhat } from '../objects/redhat';
-
-let cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-let player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+import { Player } from '../objects/player';
 export class MainScene extends Phaser.Scene {
-	private myRedhat: Redhat;
+	cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+	player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+	keys: Record<'Z' | 'X', { isDown: boolean }>;
 
 	constructor() {
 		super({ key: 'MainScene' });
 	}
 
 	preload(): void {
-		this.load.spritesheet('char3', 'sprites/Char_3.png', {
-			frameWidth: 64,
-			frameHeight: 64,
-			endFrame: 78,
+		['char2', 'char3', 'char4', 'char5'].forEach((charName) => {
+			this.load.spritesheet(charName, `sprites/${charName}.png`, {
+				frameWidth: 64,
+				frameHeight: 64,
+				endFrame: 78,
+			});
 		});
 	}
 
 	create(): void {
-		cursors = this.input.keyboard.createCursorKeys();
-		this.anims.create({
-			key: 'idle',
-			frames: this.anims.generateFrameNumbers('char3', { start: 3, end: 3 }),
-		});
-		this.anims.create({
-			key: 'walk',
-			frames: this.anims.generateFrameNumbers('char3', {
-				frames: [11, 9, 10, 9],
-			}),
-			frameRate: 5,
-			repeat: -1,
-		});
-		this.anims.create({
-			key: 'jump',
-			frames: this.anims.generateFrameNumbers('char3', {
-				frames: [15, 51, 52, 51],
-			}),
-			frameRate: 8,
-			repeat: 0,
+		this.cursors = this.input.keyboard.createCursorKeys();
+
+		['char2', 'char3', 'char4', 'char5'].forEach((charName) => {
+			this.anims.create({
+				key: `${charName}-idle`,
+				frames: this.anims.generateFrameNumbers(charName, { start: 3, end: 3 }),
+			});
+			this.anims.create({
+				key: `${charName}-walk`,
+				frames: this.anims.generateFrameNumbers(charName, {
+					frames: [11, 9, 10, 9],
+				}),
+				frameRate: 5,
+				repeat: -1,
+			});
+			this.anims.create({
+				key: `${charName}-jump`,
+				frames: this.anims.generateFrameNumbers(charName, {
+					frames: [15, 51, 52, 51],
+				}),
+				frameRate: 8,
+				repeat: 0,
+			});
+			this.anims.create({
+				key: `${charName}-hit`,
+				frames: this.anims.generateFrameNumbers(charName, {
+					frames: [36, 37, 38, 39],
+				}),
+				frameRate: 8,
+				repeat: -1,
+			});
 		});
 
-		player = this.physics.add
-			.sprite(100, 600, 'char3')
-			.setScale(4)
-			.setGravityY(500)
-			.setCollideWorldBounds(true)
-			.play('jump');
-
-		this.physics.world.enable(player);
+		this.keys = this.input.keyboard.addKeys('Z,X') as Record<
+			'Z' | 'X',
+			{ isDown: boolean }
+		>;
+		this.player = new Player(this, this.cursors, this.keys, 'char3');
 	}
 
 	update(): void {
-		const isMidair = player.body.y !== 344;
-		if (cursors.left.isDown) {
-			if (player.anims.currentAnim.key !== 'walk' && !isMidair)
-				player.play('walk');
-			player.setVelocityX(-300);
-		} else if (cursors.right.isDown) {
-			if (player.anims.currentAnim.key !== 'walk' && !isMidair)
-				player.play('walk');
-			player.setVelocityX(300);
-		} else {
-			player.setVelocityX(0);
-			if (!isMidair) player.play('idle');
-		}
-
-		if (cursors.up.isDown && !isMidair) {
-			player.play('jump');
-			player.setVelocityY(-500);
-		}
+		this.player.update();
 	}
 }
