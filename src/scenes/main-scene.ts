@@ -48,7 +48,7 @@ export class MainScene extends Phaser.Scene {
 					frames: [36, 37, 38, 39],
 				}),
 				frameRate: 8,
-				repeat: -1,
+				repeat: 0,
 			});
 		});
 
@@ -57,6 +57,17 @@ export class MainScene extends Phaser.Scene {
 			{ isDown: boolean }
 		>;
 		this.player = new Player(this, this.cursors, this.keys, 'char3');
+		const enemy = this.physics.add
+			.sprite(300, 200, 'char4')
+			.setScale(4)
+			.setFrictionY(0)
+			.setGravityY(500)
+			.setCollideWorldBounds(true)
+			.setSize(24, 48);
+
+		this.physics.world.addCollider(this.player, enemy, (e, x) => {
+			console.log(x);
+		});
 	}
 
 	update(): void {
