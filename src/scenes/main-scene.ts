@@ -3,7 +3,7 @@ export class MainScene extends Phaser.Scene {
 	cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 	player: Character;
 	enemy: Character;
-	keys: Record<'Z' | 'X', { isDown: boolean }>;
+	keys: Record<'Z' | 'X', Phaser.Input.Keyboard.Key>;
 	enemyHp: Phaser.GameObjects.Text;
 	playerHp: Phaser.GameObjects.Text;
 
@@ -65,7 +65,7 @@ export class MainScene extends Phaser.Scene {
 
 		this.keys = this.input.keyboard.addKeys('Z,X') as Record<
 			'Z' | 'X',
-			{ isDown: boolean }
+			Phaser.Input.Keyboard.Key
 		>;
 		this.player = new Character(
 			this,
@@ -73,7 +73,7 @@ export class MainScene extends Phaser.Scene {
 			'char3'
 		);
 
-		const defKey = { isDown: false };
+		const defKey: Phaser.Input.Keyboard.Key = { isDown: false };
 
 		this.enemy = new Character(
 			this,
@@ -119,9 +119,9 @@ export class MainScene extends Phaser.Scene {
 		// );
 	}
 
-	update(): void {
-		this.player.update();
-		this.enemy.update();
+	update(t: number, dt: number): void {
+		this.player.update(t, dt);
+		this.enemy.update(t, dt);
 
 		this.enemyHp.text = String(this.enemy.hp);
 		this.playerHp.text = String(this.player.hp);
