@@ -6,6 +6,7 @@ export class MainScene extends Phaser.Scene {
 	keys: Record<'Z' | 'X', Phaser.Input.Keyboard.Key>;
 	enemyHp: Phaser.GameObjects.Text;
 	playerHp: Phaser.GameObjects.Text;
+	floor: Phaser.GameObjects.Rectangle;
 
 	constructor() {
 		super({ key: 'MainScene' });
@@ -77,16 +78,7 @@ export class MainScene extends Phaser.Scene {
 
 		this.enemy = new Character(
 			this,
-			{
-				left: defKey,
-				right: defKey,
-				up: defKey,
-				down: defKey,
-				space: defKey,
-				shift: defKey,
-				Z: defKey,
-				X: defKey,
-			},
+			{ ...this.cursors, ...this.keys },
 			'char4'
 		);
 
@@ -95,6 +87,11 @@ export class MainScene extends Phaser.Scene {
 			// this.player.setVelocityX(0);
 			// this.enemy.setVelocityX(0);
 		});
+
+		this.floor = this.add.rectangle(400, 591, 800, 20, 0x00ffff);
+		this.physics.add.existing(this.floor, true);
+		this.physics.add.collider(this.floor, this.player);
+		this.physics.add.collider(this.floor, this.enemy);
 
 		this.physics.add.overlap(this.player.dmgHitbox, this.enemy, () => {
 			this.player.dmgHitbox.body.enable = true;
@@ -105,7 +102,6 @@ export class MainScene extends Phaser.Scene {
 
 		this.enemyHp = this.add.text(600, 0, String(this.enemy.hp));
 		this.playerHp = this.add.text(200, 0, String(this.player.hp));
-
 		// this.physics.add.collider(
 		// 	this.player.dmgHitbox,
 		// 	this.enemy,

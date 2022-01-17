@@ -16,6 +16,8 @@ export class Character extends Phaser.Physics.Arcade.Sprite {
 	public dmgHitbox: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 	public hp: number = 100;
 	private stateMachine: StateMachine;
+	private debugText: Phaser.GameObjects.Text;
+	private isOnGround: boolean;
 
 	constructor(
 		scene: Phaser.Scene,
@@ -25,6 +27,7 @@ export class Character extends Phaser.Physics.Arcade.Sprite {
 		super(scene, 100, 200, charName);
 		this.isOnCooldown = false;
 		this.cooldownUntil = Date.now();
+		this.isOnGround = false;
 
 		scene.add.existing(this);
 		scene.physics.add.existing(this);
@@ -36,6 +39,7 @@ export class Character extends Phaser.Physics.Arcade.Sprite {
 			.setSize(24, 48)
 			.play(`${this.charName}-idle`);
 
+		this.debugText = scene.add.text(this.x, this.y, '');
 		this.dmgHitbox = scene.add.rectangle(
 			0,
 			0,
@@ -63,6 +67,7 @@ export class Character extends Phaser.Physics.Arcade.Sprite {
 			.add('punch', {
 				enter: this.punchEnter,
 				update: this.punchUpdate,
+				exit: this.punchExit,
 			})
 			.add('damaged', {
 				enter: this.damageEnter,
@@ -72,7 +77,6 @@ export class Character extends Phaser.Physics.Arcade.Sprite {
 	}
 
 	private idleEnter() {
-		this.dmgHitbox.setPosition(0, 0);
 		this.play(`${this.charName}-idle`);
 	}
 
@@ -132,7 +136,7 @@ export class Character extends Phaser.Physics.Arcade.Sprite {
 				this.setVelocityX(0);
 		}
 
-		if (this.body.blocked.down) {
+		if (this.body.blocked.down || this.body.touching.down) {
 			this.stateMachine.set('idle');
 		}
 	}
@@ -157,35 +161,42 @@ export class Character extends Phaser.Physics.Arcade.Sprite {
 		}
 	}
 
+	private punchExit() {
+		this.dmgHitbox.setPosition(0, 0);
+	}
+
 	private damageEnter() {
-		this.setVelocityY(-300);
-		this.play(`${this.charName}-dmg`, true);
+		this.y += 1;
+		this.setVelocityY(-500);
+		this.play(`${this.charName}-dmg`);
 		this.tint = 0xff0000;
 	}
 
-	private damageUpdate() {
-		console.log(this.body.blocked.down);
-
-		if (this.body.blocked.down) {
+	private damageUpdate(t: number) {
+		if (this.isOnGround) {
+			this.clearTint();
 			this.stateMachine.set('idle');
 		}
 	}
 
 	public receiveDamage(xPositive: boolean) {
 		// if (this.body.blocked.down) {
-		this.stateMachine.set('damaged');
 		this.hp -= 10;
 		this.setVelocityX(50 * (xPositive ? 1 : -1));
+		this.stateMachine.set('damaged');
 
 		// }
 	}
 
 	public update(t: number, dt: number) {
-		if (this.hp <= 0) {
-			this.tint = 0x000000;
-			this.body.enable = false;
-		}
+		// if (this.hp <= 0) {
+		// 	this.tint = 0x000000;
+		// 	this.body.enable = false;
+		// }
 
+		this.isOnGround = Math.floor(this.y) === 485;
+		this.debugText.setX(this.x);
+		this.debugText.text = String(this.isOnGround);
 		this.stateMachine.update(dt);
 	}
 }
