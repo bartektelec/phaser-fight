@@ -24,6 +24,11 @@ export class MainScene extends Phaser.Scene {
 				endFrame: 78,
 			});
 		});
+
+		this.load.spritesheet('punch-effect', 'sprites/effect1.png', {
+			frameWidth: 64,
+			frameHeight: 32,
+		});
 	}
 
 	create(): void {
@@ -64,6 +69,15 @@ export class MainScene extends Phaser.Scene {
 					frames: [57, 59],
 				}),
 				frameRate: 8,
+				repeat: 0,
+			});
+
+			this.anims.create({
+				key: 'punch-anim',
+				frames: this.anims.generateFrameNumbers('punch-effect', {
+					frames: [1, 2, 3, 4, 5],
+				}),
+				frameRate: 6,
 				repeat: 0,
 			});
 		});

@@ -18,6 +18,7 @@ export class Character extends Phaser.Physics.Arcade.Sprite {
 	private stateMachine: StateMachine;
 	private debugText: Phaser.GameObjects.Text;
 	private isOnGround: boolean;
+	private effectSprite;
 
 	constructor(
 		scene: Phaser.Scene,
@@ -50,6 +51,10 @@ export class Character extends Phaser.Physics.Arcade.Sprite {
 		) as unknown as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 		scene.physics.add.existing(this.dmgHitbox);
 		this.dmgHitbox.body.allowGravity = false;
+
+		this.effectSprite = this.scene.add
+			.sprite(this.x, this.y, 'punch-effect')
+			.setScale(2);
 
 		this.stateMachine = new StateMachine(this)
 			.add('idle', {
@@ -170,6 +175,7 @@ export class Character extends Phaser.Physics.Arcade.Sprite {
 		this.setVelocityY(-500);
 		this.play(`${this.charName}-dmg`);
 		this.tint = 0xff0000;
+		this.effectSprite.setPosition(this.x, this.y).play('punch-anim');
 	}
 
 	private damageUpdate(t: number) {
