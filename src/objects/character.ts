@@ -41,12 +41,12 @@ export class Character extends Phaser.Physics.Arcade.Sprite {
 
 		this.debugText = scene.add.text(this.x, this.y, '');
 		this.dmgHitbox = scene.add.rectangle(
-			0,
-			0,
+			-40,
+			-40,
 			40,
 			40,
 			0xffffff,
-			0.5
+			0
 		) as unknown as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 		scene.physics.add.existing(this.dmgHitbox);
 		this.dmgHitbox.body.allowGravity = false;
@@ -180,23 +180,19 @@ export class Character extends Phaser.Physics.Arcade.Sprite {
 	}
 
 	public receiveDamage(xPositive: boolean) {
-		// if (this.body.blocked.down) {
 		this.hp -= 10;
 		this.setVelocityX(50 * (xPositive ? 1 : -1));
 		this.stateMachine.set('damaged');
-
-		// }
 	}
 
 	public update(t: number, dt: number) {
-		// if (this.hp <= 0) {
-		// 	this.tint = 0x000000;
-		// 	this.body.enable = false;
-		// }
+		if (this.hp <= 0) {
+			this.tint = 0x000000;
+			this.body.enable = false;
+		}
 
 		this.isOnGround = Math.floor(this.y) === 485;
 		this.debugText.setX(this.x);
-		this.debugText.text = String(this.isOnGround);
 		this.stateMachine.update(dt);
 	}
 }

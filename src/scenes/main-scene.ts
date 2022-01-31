@@ -1,12 +1,16 @@
 import { Character } from '../objects/character';
+
+const MAX_HP_WIDTH = 300;
+
 export class MainScene extends Phaser.Scene {
 	cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 	player: Character;
 	enemy: Character;
 	keys: Record<'Z' | 'X', Phaser.Input.Keyboard.Key>;
-	enemyHp: Phaser.GameObjects.Text;
-	playerHp: Phaser.GameObjects.Text;
+	enemyHp: Phaser.GameObjects.Rectangle;
+	playerHp: Phaser.GameObjects.Rectangle;
 	floor: Phaser.GameObjects.Rectangle;
+	text: Phaser.GameObjects.Text;
 
 	constructor() {
 		super({ key: 'MainScene' });
@@ -100,26 +104,47 @@ export class MainScene extends Phaser.Scene {
 			this.player.dmgHitbox.setPosition(0, 0);
 		});
 
-		this.enemyHp = this.add.text(600, 0, String(this.enemy.hp));
-		this.playerHp = this.add.text(200, 0, String(this.player.hp));
-		// this.physics.add.collider(
-		// 	this.player.dmgHitbox,
-		// 	this.enemy,
-		// 	(one, two) => {
-		// 		console.log(this.player.isOnCooldown);
-		// 		this.player.setVelocityX(0);
-		// 		this.enemy.setVelocityX(0);
-		// 	},
-		// 	null,
-		// 	this
-		// );
+		this.physics.add.overlap(this.enemy.dmgHitbox, this.player, () => {
+			this.enemy.dmgHitbox.body.enable = true;
+			this.player.receiveDamage(!this.enemy.flipX);
+
+			this.enemy.dmgHitbox.setPosition(0, 0);
+		});
+
+		this.enemyHp = this.add.rectangle(
+			600,
+			0,
+			(this.enemy.hp / 100) * MAX_HP_WIDTH,
+			20,
+			0xff0000
+		);
+		this.playerHp = this.add.rectangle(
+			200,
+			0,
+			(this.player.hp / 100) * MAX_HP_WIDTH,
+			20,
+			0xff0000
+		);
+
+		this.text = this.add.text(400, 200, '', {
+			fontFamily: 'sans-serif',
+			fontSize: '72px',
+		});
 	}
 
 	update(t: number, dt: number): void {
 		this.player.update(t, dt);
 		this.enemy.update(t, dt);
 
-		this.enemyHp.text = String(this.enemy.hp);
-		this.playerHp.text = String(this.player.hp);
+		if (this.player.hp <= 0) {
+			this.text.text = 'Player lose';
+		} else if (this.enemy.hp <= 0) {
+			this.text.text = 'Enemy lose';
+		}
+		this.text.x = 400 - this.text.width / 2;
+
+		this.playerHp.width = (this.player.hp / 100) * MAX_HP_WIDTH;
+		this.enemyHp.width = (this.enemy.hp / 100) * MAX_HP_WIDTH;
+		this.enemyHp.x = 600 + MAX_HP_WIDTH - this.enemyHp.width;
 	}
 }
